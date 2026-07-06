@@ -34,3 +34,11 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# --- Agentic reference / scratch docs ---
+/SPEC.md
+/BACKEND_RENDER_BRIEF.md
+/FRONTEND_BRIEF.md
+/DRIFT_REPORT.md
+/TESTING.md
+/prompts/
