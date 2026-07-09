@@ -9,7 +9,7 @@ import {
   Mail, Lock, Eye, EyeOff, MailWarning, Send, Cloud, Files, Folder, Database,
   LogOut, FolderPlus, Upload, FolderOpen, AlertCircle, File, Download, X, Edit2,
   FolderInput, Trash2, Link2, Copy, Slash, CheckCircle, AlertTriangle, FileText,
-  Video, FileType, Table, Image, Sun, Moon, Smartphone,
+  Video, FileType, Table, Image, Sun, Moon, Menu, EllipsisVertical,
   Search, LayoutGrid, List, UploadCloud, HardDrive, ShieldCheck, Zap,
   Music, Archive, FileCode,
 } from 'lucide';
@@ -18,7 +18,7 @@ export const appIcons = {
   Mail, Lock, Eye, EyeOff, MailWarning, Send, Cloud, Files, Folder, Database,
   LogOut, FolderPlus, Upload, FolderOpen, AlertCircle, File, Download, X, Edit2,
   FolderInput, Trash2, Link2, Copy, Slash, CheckCircle, AlertTriangle, FileText,
-  Video, FileType, Table, Image, Sun, Moon, Smartphone,
+  Video, FileType, Table, Image, Sun, Moon, Menu, EllipsisVertical,
   Search, LayoutGrid, List, UploadCloud, HardDrive, ShieldCheck, Zap,
   Music, Archive, FileCode,
 };

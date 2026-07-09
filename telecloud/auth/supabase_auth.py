@@ -17,6 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
+import httpx
 from supabase import AsyncClient, create_async_client
 from supabase.lib.client_options import AsyncClientOptions
 from supabase_auth.errors import AuthApiError, AuthError
@@ -116,6 +117,8 @@ class SupabaseAuth:
             raise self._api_error(exc, default=ErrorCode.VALIDATION_ERROR) from exc
         except AuthError as exc:
             raise self._unknown_error(exc) from exc
+        except httpx.HTTPError as exc:
+            raise self._unknown_error(exc) from exc
 
         user = getattr(response, "user", None)
         session = getattr(response, "session", None)
@@ -160,6 +163,8 @@ class SupabaseAuth:
             return
         except AuthError as exc:
             raise self._unknown_error(exc) from exc
+        except httpx.HTTPError as exc:
+            raise self._unknown_error(exc) from exc
 
     async def sign_in(self, *, email: str, password: str) -> AuthSession:
         """Verify credentials with Supabase and return the issued session.
@@ -174,6 +179,8 @@ class SupabaseAuth:
         except AuthApiError as exc:
             raise self._api_error(exc, default=ErrorCode.UNAUTHORIZED) from exc
         except AuthError as exc:
+            raise self._unknown_error(exc) from exc
+        except httpx.HTTPError as exc:
             raise self._unknown_error(exc) from exc
         return self._session_from(response, on_missing="login")
 
@@ -196,6 +203,9 @@ class SupabaseAuth:
             await self._client.auth.sign_out()
         except AuthError:
             # Already-expired/already-revoked sessions are fine to ignore.
+            return
+        except httpx.HTTPError:
+            # Unreachable Supabase is not the client's problem — see docstring.
             return
 
     async def aclose(self) -> None:
@@ -230,7 +240,7 @@ class SupabaseAuth:
         return TeleCloudError.from_code(default, message)
 
     @staticmethod
-    def _unknown_error(exc: AuthError) -> TeleCloudError:
+    def _unknown_error(exc: AuthError | httpx.HTTPError) -> TeleCloudError:
         return TeleCloudError.from_code(
             ErrorCode.INTERNAL_ERROR, "Could not reach the authentication service."
         )

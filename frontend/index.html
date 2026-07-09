@@ -14,16 +14,19 @@
   <!-- TOAST CONTAINER -->
   <div id="toast-container" class="toast-container"></div>
 
+  <!-- WAKEUP OVERLAY: shown while a cold-started backend (e.g. Render free tier) is retried -->
+  <div id="wakeup-overlay" class="wakeup-overlay">
+    <div class="wakeup-card">
+      <div class="spinner spinner-lg"></div>
+      <h3>Waking up the server</h3>
+      <p>The backend went idle and is starting back up — this can take up to a minute. Hang tight.</p>
+    </div>
+  </div>
+
   <!-- FLOATING THEME TOGGLE (hidden while the dashboard is active — it has its own) -->
   <button id="theme-toggle" class="theme-toggle-btn" data-action="toggle-theme" title="Toggle dark mode" aria-label="Toggle dark mode">
     <i data-lucide="moon" id="theme-toggle-icon" class="theme-icon"></i>
   </button>
-
-  <!-- ORIENTATION BLOCKER: shown only on small screens in portrait, via CSS media query -->
-  <div class="orientation-blocker">
-    <i data-lucide="smartphone" style="width:48px;height:48px;"></i>
-    <p>Switch to Landscape to continue</p>
-  </div>
 
   <!-- AUTH SCREEN -->
   <div id="auth-view" class="view-container active">
@@ -195,6 +198,9 @@
         </div>
       </aside>
 
+      <!-- Backdrop behind the off-canvas sidebar (mobile only) -->
+      <div class="sidebar-backdrop" data-action="close-sidebar" aria-hidden="true"></div>
+
       <!-- Main container -->
       <div class="main-container">
         <!-- Unverified warning banner -->
@@ -205,6 +211,9 @@
 
         <!-- Header / topbar -->
         <div class="dashboard-header">
+          <button class="btn-icon sidebar-toggle" data-action="toggle-sidebar" title="Menu" aria-label="Open navigation menu">
+            <i data-lucide="menu" style="width:20px;height:20px;"></i>
+          </button>
           <div id="breadcrumbs" class="breadcrumbs">
             <span class="breadcrumb-item active">My Files</span>
           </div>
@@ -418,7 +427,7 @@
 
   <!-- SHARE CONFIG MODAL -->
   <div id="share-modal" class="modal-overlay">
-    <div class="modal-card" style="max-width:560px;">
+    <div class="modal-card modal-card-wide">
       <div class="modal-header">
         <h3 id="share-modal-title">Share file</h3>
         <button data-action="close-modal" data-modal="share-modal" class="btn-icon">

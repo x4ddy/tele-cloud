@@ -26,8 +26,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Callbacks wired by main.js (kept here to avoid importing UI/view modules).
 let authLostHandler = () => {};
 let retryNoticeHandler = () => {};
+let retryDoneHandler = () => {};
 export function setAuthLostHandler(fn) { authLostHandler = fn; }
+// `retryNoticeHandler` fires once a request starts retrying (e.g. cold-start);
+// `retryDoneHandler` fires exactly when that same request's retry sequence
+// resolves (success or final failure) — never on a blind timeout.
 export function setRetryNoticeHandler(fn) { retryNoticeHandler = fn; }
+export function setRetryDoneHandler(fn) { retryDoneHandler = fn; }
 
 function buildUrl(path) {
   if (/^https?:\/\//.test(path)) return path;
@@ -73,48 +78,53 @@ export async function request(path, opts = {}) {
   }
 
   let attempt = 0;
-  for (;;) {
-    try {
-      let res = await bareFetch(path, fetchOpts);
+  let noticeFired = false;
+  try {
+    for (;;) {
+      try {
+        let res = await bareFetch(path, fetchOpts);
 
-      if (res.status === 401 && auth) {
-        if (session.refresh) {
-          try {
-            await refreshAccessToken();
-            res = await bareFetch(path, fetchOpts);
-          } catch {
+        if (res.status === 401 && auth) {
+          if (session.refresh) {
+            try {
+              await refreshAccessToken();
+              res = await bareFetch(path, fetchOpts);
+            } catch {
+              clearSession();
+              authLostHandler();
+              throw new ApiError('Your session expired. Please log in again.', { status: 401 });
+            }
+          }
+          if (res.status === 401) {
             clearSession();
             authLostHandler();
             throw new ApiError('Your session expired. Please log in again.', { status: 401 });
           }
         }
-        if (res.status === 401) {
-          clearSession();
-          authLostHandler();
-          throw new ApiError('Your session expired. Please log in again.', { status: 401 });
-        }
-      }
 
-      if (RETRYABLE_STATUS.has(res.status) && attempt < retries) {
-        if (attempt === 0) retryNoticeHandler();
-        await sleep(800 * 2 ** attempt);
-        attempt += 1;
-        continue;
+        if (RETRYABLE_STATUS.has(res.status) && attempt < retries) {
+          if (attempt === 0) { retryNoticeHandler(); noticeFired = true; }
+          await sleep(800 * 2 ** attempt);
+          attempt += 1;
+          continue;
+        }
+        return res;
+      } catch (err) {
+        if (err instanceof ApiError) throw err;
+        if (isTransient(err) && attempt < retries) {
+          if (attempt === 0) { retryNoticeHandler(); noticeFired = true; }
+          await sleep(800 * 2 ** attempt);
+          attempt += 1;
+          continue;
+        }
+        const msg = err.name === 'TimeoutError'
+          ? 'The request timed out — the server may be waking up. Please try again.'
+          : 'Network error. Check your connection and that the server is reachable.';
+        throw new ApiError(msg, {});
       }
-      return res;
-    } catch (err) {
-      if (err instanceof ApiError) throw err;
-      if (isTransient(err) && attempt < retries) {
-        if (attempt === 0) retryNoticeHandler();
-        await sleep(800 * 2 ** attempt);
-        attempt += 1;
-        continue;
-      }
-      const msg = err.name === 'TimeoutError'
-        ? 'The request timed out — the server may be waking up. Please try again.'
-        : 'Network error. Check your connection and that the server is reachable.';
-      throw new ApiError(msg, {});
     }
+  } finally {
+    if (noticeFired) retryDoneHandler();
   }
 }
 

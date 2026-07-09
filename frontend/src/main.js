@@ -3,12 +3,14 @@
 import './style.css';
 
 import { session, setUser, isLoggedIn } from './session.js';
-import { Auth, setAuthLostHandler, setRetryNoticeHandler } from './api.js';
+import { Auth, setAuthLostHandler, setRetryNoticeHandler, setRetryDoneHandler } from './api.js';
 import { state } from './state.js';
 import { toggleTheme } from './theme.js';
 import {
   renderIcons, transitionToView, showToast, closeModal, copyToClipboard,
   togglePasswordVisibility, registerActions, initDispatch,
+  toggleSidebar, closeSidebar, toggleItemMenu,
+  showWakeupOverlay, hideWakeupOverlay,
 } from './ui.js';
 import {
   switchAuthTab, handleAuthSubmit, resendVerificationEmail,
@@ -28,13 +30,22 @@ import {
 
 // A 401 anywhere bounces the user cleanly to the login screen.
 setAuthLostHandler(() => { handleLogout(); });
-// Show a gentle notice the first time a request has to retry (e.g. Render cold start).
-let noticeShown = false;
+// Show a full "please wait" screen while a request retries (e.g. Render cold
+// start) — hidden again the moment that request's retry sequence resolves,
+// whether it eventually succeeds or gives up. `activeWaits` guards against one
+// retrying request's success hiding the overlay while a second one is still
+// mid-retry (rare but possible if two requests fire close together).
+let activeWaits = 0;
 setRetryNoticeHandler(() => {
-  if (noticeShown) return;
-  noticeShown = true;
-  showToast('Waking up the server — this can take a moment…');
-  setTimeout(() => { noticeShown = false; }, 15_000);
+  activeWaits += 1;
+  showWakeupOverlay();
+});
+setRetryDoneHandler(() => {
+  activeWaits = Math.max(0, activeWaits - 1);
+  if (activeWaits === 0) {
+    hideWakeupOverlay();
+    showToast('Connected!');
+  }
 });
 
 function idOrNull(el) { return el.dataset.id ? el.dataset.id : null; }
@@ -68,6 +79,9 @@ registerActions({
   // browser chrome
   'set-view': (el) => setViewMode(el.dataset.view),
   'clear-search': () => clearSearch(),
+  'toggle-sidebar': () => toggleSidebar(),
+  'close-sidebar': () => closeSidebar(),
+  'item-menu': (el) => toggleItemMenu(el),
   // sharing
   'share': (el) => openShareModal(el.dataset.id, el.dataset.name),
   'create-share': (el, e) => submitCreateShare(e),

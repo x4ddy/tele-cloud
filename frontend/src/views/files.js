@@ -7,6 +7,7 @@ import { state } from '../state.js';
 import {
   showToast, openModal, closeModal, reconcileList, renderIcons,
   formatBytes, formatDate, getFileIconName, getFileIconClass, escapeHtml,
+  closeSidebar,
 } from '../ui.js';
 import {
   startUpload, startDownload, clearFinishedTransfers, isFileTransferring,
@@ -79,6 +80,7 @@ export function navigateToFolder(folderId) {
   if (folderId === null) state.navigationHistory = [];
   state.currentFolderId = folderId;
   clearSearch({ rerender: false }); // a stale query must not filter the next folder
+  closeSidebar();                 // mobile drawer closes when you pick a folder
   updateSidebarActive();          // instant highlight, no extra request
   fetchCurrentFolderContents();   // the one request a folder-open actually needs
 }
@@ -289,14 +291,28 @@ export function renderBreadcrumbs() {
 
 // ---- Files table -----------------------------------------------------------
 
+// The "..." trigger shown instead of the hover-revealed action row on
+// touch/narrow viewports (hidden on desktop via CSS). Toggling it opens the
+// row's/card's .actions-cell / .grid-card-actions as a popover.
+function buildMenuBtnHtml() {
+  return `<button class="btn-icon item-menu-btn" title="More actions" aria-label="More actions" data-action="item-menu"><i data-lucide="ellipsis-vertical" style="width:18px;height:18px;"></i></button>`;
+}
+
+// Name cell contents: icon + name, with a secondary line (size · date) that is
+// only shown in the mobile card layout.
+function buildNameHtml(iconClass, iconName, name, sub) {
+  return `
+    <div class="item-icon ${iconClass}"><i data-lucide="${iconName}" style="width:16px;height:16px;"></i></div>
+    <div class="name-text"><span class="row-name">${name}</span><span class="row-sub">${sub}</span></div>`;
+}
+
 function buildFolderRowHtml(folder) {
   const name = escapeHtml(folder.name);
   if (folder._pending) {
     return `
     <td>
       <div class="name-cell" style="opacity:0.55;cursor:default;">
-        <div class="item-icon icon-folder-box"><i data-lucide="folder" style="width:16px;height:16px;"></i></div>
-        <span>${name}</span>
+        ${buildNameHtml('icon-folder-box', 'folder', name, 'Creating…')}
       </div>
     </td>
     <td>—</td>
@@ -306,8 +322,7 @@ function buildFolderRowHtml(folder) {
   return `
     <td>
       <a href="#" class="name-cell" data-action="open-folder" data-id="${folder.id}" data-name="${name}">
-        <div class="item-icon icon-folder-box"><i data-lucide="folder" style="width:16px;height:16px;"></i></div>
-        <span>${name}</span>
+        ${buildNameHtml('icon-folder-box', 'folder', name, `Folder · ${shortDate(folder.created_at)}`)}
       </a>
     </td>
     <td>—</td>
@@ -318,6 +333,7 @@ function buildFolderRowHtml(folder) {
         <button class="btn-icon" title="Move" data-action="move" data-type="folder" data-id="${folder.id}" data-name="${name}"><i data-lucide="folder-input" style="width:16px;height:16px;"></i></button>
         <button class="btn-icon danger-hover" title="Delete" data-action="delete-folder" data-id="${folder.id}"><i data-lucide="trash-2" style="width:16px;height:16px;"></i></button>
       </div>
+      ${buildMenuBtnHtml()}
     </td>`;
 }
 
@@ -326,8 +342,7 @@ function buildFileRowHtml(file) {
   return `
     <td>
       <div class="name-cell file-node">
-        <div class="item-icon ${getFileIconClass(file.name)}"><i data-lucide="${getFileIconName(file.name)}" style="width:16px;height:16px;"></i></div>
-        <span>${name}</span>
+        ${buildNameHtml(getFileIconClass(file.name), getFileIconName(file.name), name, `${formatBytes(file.size_bytes)} · ${shortDate(file.created_at)}`)}
       </div>
     </td>
     <td>${formatBytes(file.size_bytes)}</td>
@@ -340,6 +355,7 @@ function buildFileRowHtml(file) {
         <button class="btn-icon" title="Move" data-action="move" data-type="file" data-id="${file.id}" data-name="${name}"><i data-lucide="folder-input" style="width:16px;height:16px;"></i></button>
         <button class="btn-icon danger-hover" title="Delete" data-action="delete-file" data-id="${file.id}"><i data-lucide="trash-2" style="width:16px;height:16px;"></i></button>
       </div>
+      ${buildMenuBtnHtml()}
     </td>`;
 }
 
@@ -361,6 +377,7 @@ function buildFolderCardHtml(folder) {
   }
   return `
     <a href="#" class="grid-card-link" data-action="open-folder" data-id="${folder.id}" data-name="${name}" aria-label="Open folder ${name}"></a>
+    ${buildMenuBtnHtml()}
     <div class="grid-card-actions">
       <button class="btn-icon" title="Rename" data-action="rename" data-type="folder" data-id="${folder.id}" data-name="${name}"><i data-lucide="edit-2"></i></button>
       <button class="btn-icon" title="Move" data-action="move" data-type="folder" data-id="${folder.id}" data-name="${name}"><i data-lucide="folder-input"></i></button>
@@ -374,6 +391,7 @@ function buildFolderCardHtml(folder) {
 function buildFileCardHtml(file) {
   const name = escapeHtml(file.name);
   return `
+    ${buildMenuBtnHtml()}
     <div class="grid-card-actions">
       <button class="btn-icon" title="Download" data-action="download" data-id="${file.id}"><i data-lucide="download"></i></button>
       <button class="btn-icon" title="Share" data-action="share" data-id="${file.id}" data-name="${name}"><i data-lucide="link-2"></i></button>

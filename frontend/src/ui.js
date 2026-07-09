@@ -93,11 +93,45 @@ export function closeModal(id) {
   document.getElementById(id).classList.remove('active');
 }
 
+// ---- Wakeup overlay (cold-start retry notice) -------------------------------
+
+export function showWakeupOverlay() {
+  document.getElementById('wakeup-overlay').classList.add('active');
+}
+export function hideWakeupOverlay() {
+  document.getElementById('wakeup-overlay').classList.remove('active');
+}
+
 export function transitionToView(viewId) {
   document.querySelectorAll('.view-container').forEach((v) => v.classList.remove('active'));
   const view = document.getElementById(viewId);
   view.classList.add('active');
   renderIcons(view);
+}
+
+// ---- Mobile sidebar drawer --------------------------------------------------
+// Below the mobile breakpoint the dashboard sidebar is an off-canvas drawer;
+// `sidebar-open` on <body> slides it in over a backdrop (see style.css). On
+// desktop the class has no effect — the drawer styles live in a media query.
+
+export function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+export function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+// ---- Per-item overflow menus ------------------------------------------------
+// On touch/narrow viewports the hover-revealed action buttons are unreachable,
+// so each row/card gets a "..." trigger that toggles `menu-open` on its host.
+// Only one menu is open at a time; any click elsewhere closes it (initDispatch).
+
+export function toggleItemMenu(el) {
+  const host = el.closest('tr, .grid-card');
+  if (!host) return;
+  const wasOpen = host.classList.contains('menu-open');
+  closeItemMenus();
+  if (!wasOpen) host.classList.add('menu-open');
+}
+
+export function closeItemMenus() {
+  document.querySelectorAll('.menu-open').forEach((el) => el.classList.remove('menu-open'));
 }
 
 export function togglePasswordVisibility(id) {
@@ -124,6 +158,9 @@ export function registerActions(map) { Object.assign(actions, map); }
 export function initDispatch() {
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-action]');
+    // Any click that isn't the "..." trigger itself dismisses open item menus
+    // (the trigger manages its own toggle, including closing siblings).
+    if (!el || el.dataset.action !== 'item-menu') closeItemMenus();
     if (!el) return;
     if (el.tagName === 'A') e.preventDefault(); // action links never navigate
     const fn = actions[el.dataset.action];
@@ -134,6 +171,9 @@ export function initDispatch() {
     if (!el) return;
     const fn = actions[el.dataset.actionSubmit];
     if (fn) fn(el, e);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeSidebar(); closeItemMenus(); }
   });
 }
 
