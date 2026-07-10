@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TeleCloud — Cloud storage, powered by Telegram</title>
   <meta name="description" content="Secure, fast, and unlimited cloud storage powered by Telegram's Bot API as the storage backend. Split, stream, and share files.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -80,6 +77,10 @@
               </div>
               <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-submit">Log in</button>
             </form>
+            <div class="auth-divider"><span>or</span></div>
+            <button type="button" id="try-demo-btn" class="btn btn-outline btn-submit" data-action="try-demo">
+              <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Try Demo — no account needed
+            </button>
           </div>
           <div id="auth-switch-note" class="auth-switch-note">
             Don't have an account? <a href="#" data-action="auth-tab" data-tab="signup">Sign up.</a>
@@ -111,11 +112,8 @@
           </ul>
         </div>
 
-        <button data-action="resend-verification" class="btn btn-outline btn-verify-action">
+        <button data-action="resend-verification" class="btn btn-primary btn-verify-action">
           <i data-lucide="send" style="width:16px;height:16px;"></i> Resend verification email
-        </button>
-        <button data-action="enter-unverified" class="btn btn-primary btn-verify-action">
-          Continue to my files
         </button>
         <button data-action="logout" class="btn btn-text btn-verify-action">
           Back to login

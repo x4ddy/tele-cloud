@@ -64,6 +64,36 @@ export function needsRefreshSoon() {
     Date.now() > session.expiresAt - 60_000;
 }
 
+// "Try Demo": mint a brand-new anonymous Supabase session. POSTing /auth/v1/signup
+// with an empty body (and anonymous sign-ins enabled on the project) returns a
+// full session — no email, no password, no confirmation. The account has no
+// email, so the profile trigger creates it unverified and it lands in the capped
+// tier automatically.
+export async function signInAnonymously() {
+  if (!CAN_REFRESH) throw new Error('Demo sign-in is not configured.');
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({}),
+  });
+  let data = null;
+  try { data = await res.json(); } catch { /* empty/non-JSON body */ }
+
+  if (!res.ok || !data?.access_token) {
+    if (data?.error_code === 'anonymous_provider_disabled') {
+      throw new Error('Demo mode is currently disabled (anonymous sign-ins are off for this project).');
+    }
+    throw new Error(data?.msg || data?.error_description || 'Demo sign-in failed. Please try again.');
+  }
+
+  setSession({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_in: data.expires_in,
+  });
+}
+
 let inFlight = null;
 
 // Renew the access token. Single-flight: concurrent callers share one request.

@@ -2,7 +2,9 @@
 // email-confirmation redirect, and logout.
 
 import { Auth } from '../api.js';
-import { session, setSession, setUser, clearSession } from '../session.js';
+import {
+  session, setSession, setUser, clearSession, signInAnonymously,
+} from '../session.js';
 import { state } from '../state.js';
 import { showToast, transitionToView, renderIcons } from '../ui.js';
 import { loadDashboard } from './files.js';
@@ -92,9 +94,27 @@ export async function resendVerificationEmail() {
   }
 }
 
-export function enterDashboardUnverified() {
-  transitionToView('dashboard-view');
-  loadDashboard();
+// "Try Demo": one click, one throwaway anonymous account, straight into the
+// dashboard. This is the sanctioned "let me poke at it first" path — real email
+// signups must verify (there is no longer a skip button on the verify screen).
+export async function handleTryDemo(button) {
+  const original = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<div class="spinner" style="width:16px;height:16px;"></div>';
+
+  try {
+    await signInAnonymously();
+    setUser(await Auth.me());
+    showToast('Demo account ready — you\'re in a private sandbox.');
+    transitionToView('dashboard-view');
+    loadDashboard();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    button.disabled = false;
+    button.innerHTML = original;
+    renderIcons(button);
+  }
 }
 
 // Supabase confirmation redirect: tokens (or an error) arrive in the URL fragment.

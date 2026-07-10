@@ -11,7 +11,7 @@ import {
   FolderInput, Trash2, Link2, Copy, Slash, CheckCircle, AlertTriangle, FileText,
   Video, FileType, Table, Image, Sun, Moon, Menu, EllipsisVertical,
   Search, LayoutGrid, List, UploadCloud, HardDrive, ShieldCheck, Zap,
-  Music, Archive, FileCode,
+  Music, Archive, FileCode, Sparkles,
 } from 'lucide';
 
 export const appIcons = {
@@ -20,5 +20,5 @@ export const appIcons = {
   FolderInput, Trash2, Link2, Copy, Slash, CheckCircle, AlertTriangle, FileText,
   Video, FileType, Table, Image, Sun, Moon, Menu, EllipsisVertical,
   Search, LayoutGrid, List, UploadCloud, HardDrive, ShieldCheck, Zap,
-  Music, Archive, FileCode,
+  Music, Archive, FileCode, Sparkles,
 };

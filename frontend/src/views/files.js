@@ -17,7 +17,8 @@ import {
 
 export async function loadDashboard() {
   const user = session.user;
-  document.getElementById('user-email').textContent = user?.email || '';
+  const isDemo = Boolean(user && !user.email); // anonymous "Try Demo" account
+  document.getElementById('user-email').textContent = user?.email || (isDemo ? 'Demo account' : '');
   const avatar = document.getElementById('user-avatar');
   if (avatar) avatar.textContent = (user?.email || '?').charAt(0);
 
@@ -28,9 +29,15 @@ export async function loadDashboard() {
     badge.className = 'user-badge';
     banner.style.display = 'none';
   } else {
-    badge.textContent = 'Unverified';
+    badge.textContent = isDemo ? 'Demo' : 'Unverified';
     badge.className = 'user-badge unverified';
     banner.style.display = 'flex';
+    // A demo account has no email to verify — reword the banner and hide "Resend".
+    banner.querySelector('span').innerHTML = isDemo
+      ? '<i data-lucide="sparkles" style="width:15px;height:15px;"></i> Demo sandbox — storage is limited to 500 MiB total and 30 MiB per file.'
+      : '<i data-lucide="mail-warning" style="width:15px;height:15px;"></i> Email unverified — storage is limited to 500 MiB total and 30 MiB per file.';
+    banner.querySelector('button').style.display = isDemo ? 'none' : '';
+    renderIcons(banner);
   }
 
   await fetchCurrentFolderContents();

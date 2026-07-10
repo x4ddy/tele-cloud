@@ -14,7 +14,7 @@ import {
 } from './ui.js';
 import {
   switchAuthTab, handleAuthSubmit, resendVerificationEmail,
-  enterDashboardUnverified, handleSupabaseRedirect, handleLogout,
+  handleTryDemo, handleSupabaseRedirect, handleLogout,
 } from './views/auth.js';
 import {
   loadDashboard, navigateToFolder, handleFolderClick,
@@ -56,7 +56,7 @@ registerActions({
   'auth-submit': (el, e) => handleAuthSubmit(e),
   'toggle-password': (el) => togglePasswordVisibility(el.dataset.target),
   'resend-verification': () => resendVerificationEmail(),
-  'enter-unverified': () => enterDashboardUnverified(),
+  'try-demo': (el) => handleTryDemo(el),
   'logout': () => handleLogout(),
   'go-login': () => handleLogout(),
   // navigation
@@ -120,21 +120,23 @@ async function initializeApp() {
   // reload never flashes the login page. Then confirm with the server in the
   // background: a real 401 logs out via the api client's authLostHandler; a
   // transient/offline error is ignored so we don't kick out a valid session.
+  // Anonymous demo accounts have no email at all — there is nothing to verify,
+  // so only email accounts awaiting confirmation are parked on the verify screen.
   const cached = session.user;
-  if (cached && !cached.email_verified) {
+  const showedVerify = Boolean(cached && cached.email && !cached.email_verified);
+  if (showedVerify) {
     transitionToView('verify-view');
   } else {
-    transitionToView('dashboard-view'); // verified, or unknown (optimistic)
+    transitionToView('dashboard-view'); // verified, anonymous, or unknown (optimistic)
     loadDashboard();
   }
 
   try {
     const fresh = await Auth.me();
-    const wasVerified = session.user?.email_verified;
     setUser(fresh);
-    if (!fresh.email_verified) {
+    if (fresh.email && !fresh.email_verified) {
       transitionToView('verify-view');
-    } else if (!cached || !wasVerified) {
+    } else if (!cached || showedVerify) {
       // First confirmation (no cache) or just-verified — (re)enter the dashboard.
       transitionToView('dashboard-view');
       loadDashboard();
