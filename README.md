@@ -28,20 +28,21 @@ The interesting work happens underneath the file browser: publishing uploads onl
   <img src="docs/assets/workspace-demo.gif" alt="TeleCloud file workspace with project folders and an animated close-up of completed uploads" width="840">
 </p>
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>Share on your terms</h3>
-      <img src="docs/assets/sharing-demo.gif" alt="TeleCloud sharing dialog highlighting optional expiry dates and download limits" width="480">
-      <p>Create public links with optional expiry dates and download limits. Revoke access when a link is no longer needed.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>Keep transfers visible</h3>
-      <img src="docs/assets/streaming-demo.gif" alt="TeleCloud download transfer panel showing an 8 MB file downloaded successfully" width="480">
-      <p>Track progress, speed, and ETA in the transfer panel. The API supports HTTP Range requests for resumable downloads.</p>
-    </td>
-  </tr>
-</table>
+### Share on your terms
+
+Create public links with optional expiry dates and download limits. Revoke access when a link is no longer needed.
+
+<p align="center">
+  <img src="docs/assets/sharing-demo.gif" alt="TeleCloud sharing dialog highlighting optional expiry dates and download limits" width="480">
+</p>
+
+### Keep transfers visible
+
+Track progress, speed, and ETA in the transfer panel. The API supports HTTP Range requests for resumable downloads.
+
+<p align="center">
+  <img src="docs/assets/streaming-demo.gif" alt="TeleCloud download transfer panel showing an 8 MB file downloaded successfully" width="480">
+</p>
 
 [Open the live demo](https://tele-cloud-nine.vercel.app/) and choose **Try Demo — no account needed**. The sandbox has a 500 MiB total quota and a 30 MiB per-file limit. The hosted backend may take a moment to wake up after being idle.
 
