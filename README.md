@@ -25,19 +25,19 @@ The interesting work happens underneath the file browser: publishing uploads onl
 **Your files, folders, and transfers in one workspace.**
 
 <p align="center">
-  <img src="docs/assets/workspace.gif" alt="TeleCloud file workspace with project folders and an animated close-up of completed uploads" width="840">
+  <img src="docs/assets/workspace-demo.gif" alt="TeleCloud file workspace with project folders and an animated close-up of completed uploads" width="840">
 </p>
 
 <table>
   <tr>
     <td width="50%" valign="top">
       <h3>Share on your terms</h3>
-      <img src="docs/assets/sharing.gif" alt="TeleCloud sharing dialog highlighting optional expiry dates and download limits" width="480">
+      <img src="docs/assets/sharing-demo.gif" alt="TeleCloud sharing dialog highlighting optional expiry dates and download limits" width="480">
       <p>Create public links with optional expiry dates and download limits. Revoke access when a link is no longer needed.</p>
     </td>
     <td width="50%" valign="top">
       <h3>Keep transfers visible</h3>
-      <img src="docs/assets/streaming.gif" alt="TeleCloud download transfer panel showing an 8 MB file downloaded successfully" width="480">
+      <img src="docs/assets/streaming-demo.gif" alt="TeleCloud download transfer panel showing an 8 MB file downloaded successfully" width="480">
       <p>Track progress, speed, and ETA in the transfer panel. The API supports HTTP Range requests for resumable downloads.</p>
     </td>
   </tr>
