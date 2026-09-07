@@ -545,6 +545,7 @@ body:has(#dashboard-view.active) .theme-toggle-btn { display: none; }
 
 .auth-panel {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -826,7 +827,60 @@ body:has(#dashboard-view.active) .theme-toggle-btn { display: none; }
 
 .tree-item-children { margin-left: 14px; padding-left: 10px; border-left: 2px dashed var(--border); margin-top: 2px; }
 
-.sidebar-bottom { display: flex; flex-direction: column; gap: 12px; }
+.sidebar-bottom { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+
+/* Project links stay below the login card and inside the dashboard navigation. */
+.social-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.auth-social-links { width: 100%; max-width: 420px; }
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.social-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+.social-link span { min-width: 0; overflow-wrap: anywhere; }
+.social-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  text-decoration: none;
+}
+.social-link-star {
+  grid-column: 1 / -1;
+  color: var(--text-primary);
+  background: var(--accent-soft);
+  border-color: var(--border-strong);
+}
+.social-link-star svg { color: var(--orange); }
+.social-link-star:hover { background: var(--bg-hover); border-color: var(--accent); }
+
+.sidebar-social-links { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.sidebar-social-links .social-link { justify-content: flex-start; padding-inline: 12px; text-align: left; }
+
+/* Keep the new links and account controls reachable on short/landscape screens. */
+.sidebar { overflow-y: auto; gap: 20px; }
+.sidebar-top { min-height: 120px; }
 
 /* Backdrop behind the off-canvas sidebar — only exists below the mobile breakpoint */
 .sidebar-backdrop { display: none; }
@@ -1865,7 +1919,7 @@ a.name-cell:hover .row-name { color: var(--accent-hover); text-decoration: under
 }
 
 @media (max-width: 900px) {
-  .auth-shell { grid-template-columns: 1fr; }
+  .auth-shell { grid-template-columns: minmax(0, 1fr); }
   .auth-brand { display: none; }
   .auth-logo-mobile { display: flex; }
 
@@ -1921,6 +1975,7 @@ a.name-cell:hover .row-name { color: var(--accent-hover); text-decoration: under
   /* Auth / status shells */
   .auth-panel { padding: 28px 16px; }
   .auth-card { padding: 26px 20px 22px; }
+  .auth-card .btn-submit { white-space: normal; }
   .public-card { padding: 26px 20px 18px; }
 
   /* iOS Safari zooms the page when a focused input's font is under 16px */
@@ -1934,10 +1989,11 @@ a.name-cell:hover .row-name { color: var(--accent-hover); text-decoration: under
     top: 0; left: 0; bottom: 0;
     z-index: 1300;
     width: min(300px, 84vw);
+    visibility: hidden;
     transform: translateX(-105%);
-    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.28s;
   }
-  body.sidebar-open .sidebar { transform: none; box-shadow: var(--shadow-lg); }
+  body.sidebar-open .sidebar { visibility: visible; transform: none; box-shadow: var(--shadow-lg); }
 
   .sidebar-backdrop {
     display: block;
