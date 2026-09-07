@@ -65,8 +65,8 @@ flowchart LR
     API <-->|"Rate limits + retry queue"| Redis["Upstash Redis"]
     QStash["QStash"] -->|"Signed cleanup callbacks"| API
 
-    classDef default fill:#101010,color:#ededed,stroke:#555555;
-    linkStyle default stroke:#777777;
+    classDef default fill:black,color:white,stroke:gray
+    linkStyle default stroke:gray
 ```
 
 ### An upload, end to end
